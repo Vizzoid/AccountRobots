@@ -2,21 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AccountRobots</title>
     <style>
-        * {
-            padding: 0;
+        body {
             margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
-        canvas {
-            background: #eee;
+
+        #container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        #canvas {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            margin-right: 20px;
+        }
+
+        form {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form label {
             display: block;
-            margin: 0 auto;
+            margin-bottom: 10px;
+        }
+
+        form input[type="text"],
+        form input[type="password"],
+        form button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        form button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="800"></canvas>
+    <div class="container">
+        <canvas id="canvas" width="800" height="800" onclick="tryMove(event.offsetX, event.offsetY)"></canvas>
+
+        <form id="signupForm" onsubmit="onSubmit(event)">
+            <h1>New Robot</h1>
+        
+            <div class="field">
+                <label for="username"><b>Username:</b></label>
+                <input type="text" placeholder="Enter Username" name="username" required>
+                <small></small>
+            </div>
+
+            <div class="field">
+                <label for="password"><b>Password:</b></label>
+                <input type="password" placeholder="Enter Password" name="password" required>
+                <small></small>
+            </div>
+    
+            <button type="submit" class="signupbtn">Sign Up</button>
+        </form>
+    </div>
+
     <script src="index.js"></script>
 </body>
 </html>

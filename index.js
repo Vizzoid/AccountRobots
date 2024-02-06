@@ -292,12 +292,14 @@ class Interaction {
      * it is an index inside the board array (board.array.length > x > 0)
      * 
      * @param {number} array 
-     * @param {number} newPosition 
+     * @param {number} newX  
+     * @param {number} newY 
      */
-    addMoveIfPossible(array, newPosition) {
-        if (newPosition < 0) return;
-        if (newPosition >= board.array.length) return;
+    addMoveIfPossible(array, newX, newY) {
+        if (newX < 0 || newY < 0) return;
+        if (newX > 4 || newY > 4) return;
 
+        const newPosition = board.toRawIndex(newX, newY);
         const newRobot = board.getRobotRaw(newPosition);
         if (newRobot != 0 && 
             board.getRobotRaw(this.position) != newRobot) {
@@ -310,18 +312,20 @@ class Interaction {
     getAvailableMoves() {
         if (!this.hasPosition()) return Array();
 
-        const robot = board.getRobotRaw(this.position);
-
         const availableMoves = Array();
 
-        this.addMoveIfPossible(availableMoves, this.position - 5 - 1);
-        this.addMoveIfPossible(availableMoves, this.position - 5);
-        this.addMoveIfPossible(availableMoves, this.position - 5 + 1);
-        this.addMoveIfPossible(availableMoves, this.position - 1);
-        this.addMoveIfPossible(availableMoves, this.position + 1);
-        this.addMoveIfPossible(availableMoves, this.position + 5 - 1);
-        this.addMoveIfPossible(availableMoves, this.position + 5);
-        this.addMoveIfPossible(availableMoves, this.position + 5 + 1);
+        const asGen = board.fromRawIndex(this.position);
+        const x = asGen.next().value;
+        const y = asGen.next().value;
+
+        this.addMoveIfPossible(availableMoves, x - 1, y - 1);
+        this.addMoveIfPossible(availableMoves, x - 1, y);
+        this.addMoveIfPossible(availableMoves, x - 1, y + 1);
+        this.addMoveIfPossible(availableMoves, x, y - 1);
+        this.addMoveIfPossible(availableMoves, x, y + 1);
+        this.addMoveIfPossible(availableMoves, x + 1, y - 1);
+        this.addMoveIfPossible(availableMoves, x + 1, y);
+        this.addMoveIfPossible(availableMoves, x + 1, y + 1);
 
         return availableMoves;
     }
@@ -386,36 +390,13 @@ const tileSpacing = 20;
  *
  * @type {Array<string>}
  */
-const robotToColor = ["black", "red", "green", "blue", "purple"];
+const robotToColor = ["black", "red", "yellow", "blue", "purple"];
 /**
  * The canvas element
  *
  * @type {HTMLCanvasElement}
  */
-const canvas = document.getElementById("gameCanvas");
-canvas.addEventListener('click', function(event) {
-    const pos = board.getTilePos(event.offsetX, event.offsetY);
-    let posX = Math.floor(pos.next().value);
-    let posY = Math.floor(pos.next().value);
-    
-    // move current robot
-    if (!interaction.canMove(posX, posY)) {
-        return;
-    }
-    
-    if (board.getRobot(posX, posY) > 0) {
-        interaction.mix(posX, posY);
-    }
-    else {
-        interaction.move(posX, posY);
-    }
-    
-    if (interaction.position > -1) return;
-    // new robot
-    const newPos = board.randomEmptyPos();
-    interaction.setPosition(newPos);
-    board.setRobotRaw(newPos, randomSize());
-});
+const canvas = document.getElementById("canvas");
 /**
  * The 2d rendering context used for drawing the raw shapes and displays on
  * screen throughout the script 
@@ -479,6 +460,36 @@ function cycle() {
  */
 function draw() {
     board.draw();
+}
+
+function tryMove(pixelX, pixelY) {
+    const pos = board.getTilePos(pixelX, pixelY);
+    let posX = Math.floor(pos.next().value);
+    let posY = Math.floor(pos.next().value);
+    
+    // move current robot
+    if (!interaction.canMove(posX, posY)) {
+        return;
+    }
+    
+    if (board.getRobot(posX, posY) > 0) {
+        interaction.mix(posX, posY);
+    }
+    else {
+        interaction.move(posX, posY);
+    }
+}
+
+function newRandomRobot() {
+    if (interaction.position > -1) return;
+    const newPos = board.randomEmptyPos();
+    interaction.setPosition(newPos);
+    board.setRobotRaw(newPos, randomSize());
+}
+
+function onSubmit(event) {
+    event.preventDefault();
+    newRandomRobot();
 }
 
 // init
