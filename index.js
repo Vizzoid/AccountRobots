@@ -379,6 +379,21 @@ class Interaction {
 
 }
 
+class PasswordManager {
+
+    constructor() {
+        this.map = new Map();
+    }
+
+    addAccount(username, password) {
+    }
+
+    exists() {
+
+    }
+
+}
+
 // constants
 /**
  * The pixel width and height of every tile in drawing on the board
@@ -390,7 +405,7 @@ const tileSpacing = 20;
  *
  * @type {Array<string>}
  */
-const robotToColor = ["black", "red", "yellow", "blue", "purple"];
+const robotToColor = ["black", "red", "orange", "yellow", "green", "blue"];
 /**
  * The canvas element
  *
@@ -404,6 +419,7 @@ const canvas = document.getElementById("canvas");
  * @type {CanvasRenderingContext2D}
  */
 const context = canvas.getContext("2d");
+const passwordBox = document.getElementById('signupForm').elements[1];
 
 /**
  * The board instance used throughout the game
@@ -417,6 +433,7 @@ const board = new Board();
  * @type {Interaction}
  */
 const interaction = new Interaction();
+const bcrypt = require('bcrypt');
 
 // util
 /**
@@ -443,7 +460,7 @@ function randomIntZero(end) {
 }
 
 function randomSize() {
-    return randomInt(1, 4);
+    return randomInt(1, robotToColor.length - 1);
 }
 
 // cycle and draw
@@ -480,16 +497,35 @@ function tryMove(pixelX, pixelY) {
     }
 }
 
-function newRandomRobot() {
+function newRandomRobot(size) {
     if (interaction.position > -1) return;
     const newPos = board.randomEmptyPos();
     interaction.setPosition(newPos);
-    board.setRobotRaw(newPos, randomSize());
+    board.setRobotRaw(newPos, size);
 }
 
 function onSubmit(event) {
     event.preventDefault();
-    newRandomRobot();
+
+    newRandomRobot(getPasswordScore(passwordBox.value));
+}
+
+function getPasswordScore(password) {
+    var score = 1;
+    console.log(password);
+    if (password.length > 7) {
+        score += 1;
+    }
+    if (/[A-Z]/.test(password)) {
+        score += 1;
+    }
+    if (/[a-z]/.test(password)) {
+        score += 1;
+    }
+    if (/[$-/:-?{-~!"^_`\[\]]/.test(password)) {
+        score += 1;
+    }
+    return score;
 }
 
 // init
